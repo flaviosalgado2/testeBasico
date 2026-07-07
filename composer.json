@@ -1,0 +1,16 @@
+{
+    "name": "flaviosalgado/testebasico",
+    "description": "Teste para vaga PHP na empresa Supremo CRM para Imobiliarias.",
+    "type": "project",
+    "autoload": {
+        "psr-4": {
+            "Flaviosalgado\\Testebasico\\": "src/"
+        }
+    },
+    "authors": [
+        {
+            "name": "flaviosalgado"
+        }
+    ],
+    "require": {}
+}
