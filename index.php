@@ -1,3 +1,24 @@
+<?php
+    require 'vendor/autoload.php';
+
+    use Flaviosalgado\Testebasico\models\Pessoas;
+
+    if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+        $pessoa = new Pessoas(
+            $_POST['nome'],
+            $_POST['telefone'],
+            $_POST['id_cidade'],
+            $_POST['id_estado']
+        );
+
+        $pessoa->salvar();
+
+        header('Location: index.php');
+        exit;
+    }
+
+    $resultPessoas = Pessoas::trazerTodas();
+?>
 <!DOCTYPE html>
 <html lang="pt-br">
 
@@ -10,30 +31,36 @@
 
 <body>
 
-    <?php
-        require 'vendor/autoload.php';
-    ?>
-
-    <nav>
-        <div>
-            <a href="#">Agenda</a>
-            <ul id="nav-mobile" class="right hide-on-med-and-down">
-                <li><a href="/">Início</a></li>
-                <li><a href="/pessoa/criar">Novo Contato</a></li>
-            </ul>
-        </div>
-    </nav>
-
-    <?php
-
-        use Flaviosalgado\Testebasico\models\Pessoas;
-
-        $resultPessoas = Pessoas::trazerTodas();
-    ?>      
+    <h1>Contatos</h1>
 
     <div>
-        
-        <h1>Contatos</h1>
+        <form method="POST" action="">
+            <div>
+                <label for="nome">Nome:</label>
+                <input type="text" id="nome" name="nome" required>
+            </div>
+
+            <div>
+                <label for="telefone">Telefone:</label>
+                <input type="text" id="telefone" name="telefone">
+            </div>
+
+            <div>
+                <label for="id_cidade">ID Cidade:</label>
+                <input type="number" id="id_cidade" name="id_cidade">
+            </div>
+
+            <div>
+                <label for="id_estado">ID Estado:</label>
+                <input type="number" id="id_estado" name="id_estado">
+            </div>
+
+            <button type="submit">Salvar</button>
+        </form>
+    </div>
+
+    <div>
+
         <h2>Listagem de Contatos</h2>
 
         <table border="1">
