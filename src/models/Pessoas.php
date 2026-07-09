@@ -6,12 +6,12 @@ use Flaviosalgado\Testebasico\DB;
 
 class Pessoas extends DB
 {
-    private $nome;
-    private $telefone;
-    private $idCidade;
-    private $idEstado;
+    private string $nome;
+    private string $telefone;
+    private int $idCidade;
+    private int $idEstado;
 
-    public function __construct($nome, $telefone, $idCidade, $idEstado)
+    public function __construct(string $nome, string $telefone, int $idCidade, int $idEstado)
     {
         $this->nome = $nome;
         $this->telefone = $telefone;
@@ -19,7 +19,7 @@ class Pessoas extends DB
         $this->idEstado = $idEstado;
     }
 
-    public function salvar()
+    public function salvar(): bool
     {
         $conn = DB::getConn();
         $stmt = $conn->prepare("INSERT INTO pessoas (nome, telefone, id_cidade, id_estado) VALUES (:nome, :telefone, :id_cidade, :id_estado)");
@@ -30,7 +30,7 @@ class Pessoas extends DB
         return $stmt->execute();
     }
 
-    public function atualizar($id)
+    public function atualizar(string $id): bool
     {
         $conn = DB::getConn();
         $stmt = $conn->prepare("UPDATE pessoas SET nome = :nome, telefone = :telefone, id_cidade = :id_cidade, id_estado = :id_estado WHERE id = :id");
@@ -42,7 +42,7 @@ class Pessoas extends DB
         return $stmt->execute();
     }
 
-    public static function buscarPorId($id)
+    public static function buscarPorId(string $id): array
     {
         $conn = DB::getConn();
         $stmt = $conn->prepare("SELECT * FROM pessoas WHERE id = :id");
@@ -51,7 +51,7 @@ class Pessoas extends DB
         return $stmt->fetch(\PDO::FETCH_ASSOC);
     }
 
-    public static function criarTabelaSeNaoExistir()
+    public static function criarTabelaSeNaoExistir(): void
     {
         $conn = DB::getConn();
         $sql = "CREATE TABLE IF NOT EXISTS pessoas (
@@ -64,7 +64,7 @@ class Pessoas extends DB
         $conn->exec($sql);
     }
 
-    public static function criarRegistrosIniciaisSeVazio()
+    public static function criarRegistrosIniciaisSeVazio(): void
     {
         $conn = DB::getConn();
         $stmt = $conn->query("SELECT COUNT(*) as total FROM pessoas");
@@ -86,7 +86,7 @@ class Pessoas extends DB
         }
     }
 
-    public static function trazerTodas()
+    public static function trazerTodas(): array
     {
         $conn = DB::getConn();
 
@@ -94,6 +94,23 @@ class Pessoas extends DB
         self::criarRegistrosIniciaisSeVazio();
         
         $stmt = $conn->query("SELECT * FROM pessoas");
+        return $stmt->fetchAll(\PDO::FETCH_ASSOC);
+    }
+
+    public static function buscar(string $termo): array
+    {
+        $conn = DB::getConn();
+
+        $sql = "SELECT * FROM pessoas
+				WHERE nome LIKE :termo
+					OR telefone LIKE :termo
+					OR id_cidade LIKE :termo
+					OR id_estado LIKE :termo";
+
+        $stmt = $conn->prepare($sql);
+        $termoBusca = '%' . $termo . '%';
+        $stmt->bindParam(':termo', $termoBusca);
+        $stmt->execute();
         return $stmt->fetchAll(\PDO::FETCH_ASSOC);
     }
 }

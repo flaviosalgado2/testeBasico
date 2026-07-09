@@ -27,7 +27,11 @@
         exit;
     }
 
-    $resultPessoas = Pessoas::trazerTodas();
+    if (isset($_GET['busca']) && !empty($_GET['busca'])) {
+        $resultPessoas = Pessoas::buscar($_GET['busca']);
+    } else {
+        $resultPessoas = Pessoas::trazerTodas();
+    }
 ?>
 <!DOCTYPE html>
 <html lang="pt-br">
@@ -68,6 +72,17 @@
             </div>
 
             <button type="submit">Salvar</button>
+        </form>
+    </div>
+
+    <div>
+        <h2>Buscar Contatos</h2>
+        <form method="GET" action="">
+            <div>
+                <input type="text" id="busca" name="busca" placeholder="Nome, telefone, cidade ou estado" value="<?= isset($_GET['busca']) ? $_GET['busca'] : '' ?>">
+                <button type="submit">Buscar</button>
+                <a href="index.php">Limpar</a>
+            </div>
         </form>
     </div>
 
