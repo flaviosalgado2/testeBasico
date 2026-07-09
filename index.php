@@ -47,11 +47,22 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Agenda</title>
+    <style>
+        .logo-supremo {
+            background-color: #0A2342;
+            padding: 40px;
+            border-radius: 8px;
+            display: block;
+            margin-bottom: 20px;
+        }
+    </style>
 </head>
 
 <body>
 
-    <h1>Contatos</h1>
+    <img src="https://supremocrm.com.br/wp-content/uploads/2020/11/logo-supremo-branco.png" class="logo-supremo">
+
+    <h1>Agenda de Contatos</h1>
 
     <div>
         <form method="POST" action="">
@@ -123,6 +134,22 @@
                 <?php endforeach; ?>
             </tbody>
         </table>
+
+        <div>
+            <h3>Descrição:</h3>
+            <p>Teste Básico para a Vaga "Desenvolvedor PHP - Remoto PJ" na Empresa Supremo CRM para Imobiliárias (Edbraulio Vieira - Diretor de Tecnologia, Full Cycle Developer)</p>
+            <p>TAREFA: Criar um CRUD de cadastro de um de Agenda de Contatos, com os campos: Nome, Telefone, 
+                ID Cidade, ID Estado. Crie as tabelas no MySQL. Faça em PHP Puro. <br>Preciso também de uma pesquisa, 
+                na tela de listar, para nome, telefone, cidade (em texto) e estado(em texto). Após fazer a tarefa, 
+                publique ela em seu Github e me envie o link.
+            </p>
+            <p>RECOMENDAÇÃO: Não use IA nesse momento, quero ver a sua lógica. Se você usar IA neste teste, 
+                será desclassificado(a).
+            </p>
+            <p>APRESENTAÇÃO: Após isso, vamos fazer uma entrevista, via google meet, para você me apresentar 
+                e fazer alterações aovivo no projeto.
+            </p>
+        </div>
     </div>
 
     <script>
