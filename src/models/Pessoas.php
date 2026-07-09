@@ -25,8 +25,8 @@ class Pessoas extends DB
         $stmt = $conn->prepare("INSERT INTO pessoas (nome, telefone, id_cidade, id_estado) VALUES (:nome, :telefone, :id_cidade, :id_estado)");
         $stmt->bindParam(':nome', $this->nome);
         $stmt->bindParam(':telefone', $this->telefone);
-        $stmt->bindParam(':id_cidade', $this->idCidade);
-        $stmt->bindParam(':id_estado', $this->idEstado);
+        $stmt->bindParam(':id_cidade', $this->idCidade, \PDO::PARAM_INT);
+        $stmt->bindParam(':id_estado', $this->idEstado, \PDO::PARAM_INT);
         return $stmt->execute();
     }
 
@@ -34,66 +34,35 @@ class Pessoas extends DB
     {
         $conn = DB::getConn();
         $stmt = $conn->prepare("UPDATE pessoas SET nome = :nome, telefone = :telefone, id_cidade = :id_cidade, id_estado = :id_estado WHERE id = :id");
-        $stmt->bindParam(':id', $id);
+        $stmt->bindParam(':id', $id, \PDO::PARAM_INT);
         $stmt->bindParam(':nome', $this->nome);
         $stmt->bindParam(':telefone', $this->telefone);
-        $stmt->bindParam(':id_cidade', $this->idCidade);
-        $stmt->bindParam(':id_estado', $this->idEstado);
+        $stmt->bindParam(':id_cidade', $this->idCidade, \PDO::PARAM_INT);
+        $stmt->bindParam(':id_estado', $this->idEstado, \PDO::PARAM_INT);
         return $stmt->execute();
     }
 
     public static function buscarPorId(string $id): array
     {
         $conn = DB::getConn();
-        $stmt = $conn->prepare("SELECT * FROM pessoas WHERE id = :id");
-        $stmt->bindParam(':id', $id);
+        $stmt = $conn->prepare("SELECT p.*, c.nome as cidade_nome, e.nome as estado_nome, e.uf as estado_uf
+                                FROM pessoas p
+                                LEFT JOIN cidade c ON p.id_cidade = c.id
+                                LEFT JOIN estado e ON p.id_estado = e.id
+                                WHERE p.id = :id");
+        $stmt->bindParam(':id', $id, \PDO::PARAM_INT);
         $stmt->execute();
         return $stmt->fetch(\PDO::FETCH_ASSOC);
-    }
-
-    public static function criarTabelaSeNaoExistir(): void
-    {
-        $conn = DB::getConn();
-        $sql = "CREATE TABLE IF NOT EXISTS pessoas (
-            id INT AUTO_INCREMENT PRIMARY KEY,
-            nome VARCHAR(255) NOT NULL,
-            telefone VARCHAR(50),
-            id_cidade INT,
-            id_estado INT
-        )";
-        $conn->exec($sql);
-    }
-
-    public static function criarRegistrosIniciaisSeVazio(): void
-    {
-        $conn = DB::getConn();
-        $stmt = $conn->query("SELECT COUNT(*) as total FROM pessoas");
-        $resultado = $stmt->fetch(\PDO::FETCH_ASSOC);
-
-        if ($resultado['total'] == 0) {
-            $contatos = [
-                ['João Silva', '(11) 98765-4321', 1, 1],
-                ['Maria Souza', '(21) 99876-5432', 2, 2],
-                ['Pedro Oliveira', '(31) 91234-5678', 3, 3],
-                ['Ana Costa', '(41) 92345-6789', 4, 4],
-                ['Carlos Santos', '(51) 93456-7890', 5, 5],
-            ];
-
-            foreach ($contatos as $contato) {
-                $pessoa = new self($contato[0], $contato[1], $contato[2], $contato[3]);
-                $pessoa->salvar();
-            }
-        }
     }
 
     public static function trazerTodas(): array
     {
         $conn = DB::getConn();
-
-        self::criarTabelaSeNaoExistir();
-        self::criarRegistrosIniciaisSeVazio();
-        
-        $stmt = $conn->query("SELECT * FROM pessoas");
+        $stmt = $conn->query("SELECT p.*, c.nome as cidade_nome, e.nome as estado_nome, e.uf as estado_uf
+                              FROM pessoas p
+                              LEFT JOIN cidade c ON p.id_cidade = c.id
+                              LEFT JOIN estado e ON p.id_estado = e.id
+                              ORDER BY p.nome");
         return $stmt->fetchAll(\PDO::FETCH_ASSOC);
     }
 
@@ -101,11 +70,15 @@ class Pessoas extends DB
     {
         $conn = DB::getConn();
 
-        $sql = "SELECT * FROM pessoas
-				WHERE nome LIKE :termo
-					OR telefone LIKE :termo
-					OR id_cidade LIKE :termo
-					OR id_estado LIKE :termo";
+        $sql = "SELECT p.*, c.nome as cidade_nome, e.nome as estado_nome, e.uf as estado_uf
+                FROM pessoas p
+                LEFT JOIN cidade c ON p.id_cidade = c.id
+                LEFT JOIN estado e ON p.id_estado = e.id
+                WHERE p.nome LIKE :termo
+                    OR p.telefone LIKE :termo
+                    OR c.nome LIKE :termo
+                    OR e.nome LIKE :termo
+                    OR e.uf LIKE :termo";
 
         $stmt = $conn->prepare($sql);
         $termoBusca = '%' . $termo . '%';
@@ -118,7 +91,7 @@ class Pessoas extends DB
     {
         $conn = DB::getConn();
         $stmt = $conn->prepare("DELETE FROM pessoas WHERE id = :id");
-        $stmt->bindParam(':id', $id);
+        $stmt->bindParam(':id', $id, \PDO::PARAM_INT);
         return $stmt->execute();
     }
 }

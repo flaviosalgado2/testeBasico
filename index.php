@@ -2,11 +2,25 @@
     require 'vendor/autoload.php';
 
     use Flaviosalgado\Testebasico\models\Pessoas;
+    use Flaviosalgado\Testebasico\models\Estado;
+    use Flaviosalgado\Testebasico\models\Cidade;
+
+    if (isset($_GET['ajax']) && $_GET['ajax'] === 'cidades' && isset($_GET['estado'])) {
+        header('Content-Type: application/json');
+        echo json_encode(Cidade::trazerPorEstado((int) $_GET['estado']));
+        exit;
+    }
 
     $pessoaEditar = null;
+    $estadoSelecionado = '';
+    $cidadeSelecionada = '';
 
     if (isset($_GET['editar'])) {
         $pessoaEditar = Pessoas::buscarPorId($_GET['editar']);
+        if ($pessoaEditar) {
+            $cidadeSelecionada = $pessoaEditar['id_cidade'] ?? '';
+            $estadoSelecionado = $pessoaEditar['id_estado'] ?? '';
+        }
     }
 
     if (isset($_GET['excluir'])) {
@@ -19,8 +33,8 @@
         $pessoa = new Pessoas(
             $_POST['nome'],
             $_POST['telefone'],
-            $_POST['id_cidade'],
-            $_POST['id_estado']
+            (int) $_POST['id_cidade'],
+            (int) $_POST['id_estado']
         );
 
         if (!empty($_POST['id'])) {
@@ -32,6 +46,8 @@
         header('Location: index.php');
         exit;
     }
+
+    $estados = Estado::trazerTodos();
 
     if (isset($_GET['busca']) && !empty($_GET['busca'])) {
         $resultPessoas = Pessoas::buscar($_GET['busca']);
@@ -54,6 +70,20 @@
             border-radius: 8px;
             display: block;
             margin-bottom: 20px;
+        }
+
+        form div {
+            margin-bottom: 10px;
+        }
+
+        label {
+            display: inline-block;
+            width: 120px;
+        }
+
+        select, input[type="text"] {
+            padding: 5px;
+            min-width: 250px;
         }
     </style>
 </head>
@@ -79,13 +109,22 @@
             </div>
 
             <div>
-                <label for="id_cidade">ID Cidade:</label>
-                <input type="number" id="id_cidade" name="id_cidade" value="<?= $pessoaEditar ? $pessoaEditar['id_cidade'] : '' ?>">
+                <label for="id_estado">Estado:</label>
+                <select id="id_estado" name="id_estado" required onchange="carregarCidades(this.value)">
+                    <option value="">Selecione um estado</option>
+                    <?php foreach ($estados as $estado) : ?>
+                        <option value="<?= $estado['id'] ?>" <?= $estado['id'] == $estadoSelecionado ? 'selected' : '' ?>>
+                            <?= $estado['nome'] ?> (<?= $estado['uf'] ?>)
+                        </option>
+                    <?php endforeach; ?>
+                </select>
             </div>
 
             <div>
-                <label for="id_estado">ID Estado:</label>
-                <input type="number" id="id_estado" name="id_estado" value="<?= $pessoaEditar ? $pessoaEditar['id_estado'] : '' ?>">
+                <label for="id_cidade">Cidade:</label>
+                <select id="id_cidade" name="id_cidade" required>
+                    <option value="">Selecione um estado primeiro</option>
+                </select>
             </div>
 
             <button type="submit">Salvar</button>
@@ -113,8 +152,8 @@
                     <th>ID</th>
                     <th>Nome</th>
                     <th>Telefone</th>
-                    <th>ID Cidade</th>
-                    <th>ID Estado</th>
+                    <th>Cidade</th>
+                    <th>Estado</th>
                     <th>AÇÕES</th>
                 </tr>
             </thead>
@@ -124,8 +163,8 @@
                         <td><?= $pessoa['id'] ?></td>
                         <td><?= $pessoa['nome'] ?></td>
                         <td><?= $pessoa['telefone'] ?></td>
-                        <td><?= $pessoa['id_cidade'] ?></td>
-                        <td><?= $pessoa['id_estado'] ?></td>
+                        <td><?= $pessoa['cidade_nome'] ?? '' ?></td>
+                        <td><?= ($pessoa['estado_nome'] ?? '') . ($pessoa['estado_uf'] ? ' (' . $pessoa['estado_uf'] . ')' : '') ?></td>
                         <td>
                             <a href="?editar=<?= $pessoa['id'] ?>">Editar</a>
                             <a href="?excluir=<?= $pessoa['id'] ?>" onclick="return confirm('Tem certeza que deseja excluir este contato?');">Excluir</a>
@@ -139,7 +178,7 @@
             <h3>Descrição:</h3>
             <p>Teste Básico para a Vaga "Desenvolvedor PHP - Remoto PJ" na Empresa Supremo CRM para Imobiliárias (Edbraulio Vieira - Diretor de Tecnologia, Full Cycle Developer)</p>
             <p>TAREFA: Criar um CRUD de cadastro de um de Agenda de Contatos, com os campos: Nome, Telefone, 
-                ID Cidade, ID Estado. Crie as tabelas no MySQL. Faça em PHP Puro. <br>Preciso também de uma pesquisa, 
+                Cidade, Estado. Crie as tabelas no MySQL. Faça em PHP Puro. <br>Preciso também de uma pesquisa, 
                 na tela de listar, para nome, telefone, cidade (em texto) e estado(em texto). Após fazer a tarefa, 
                 publique ela em seu Github e me envie o link.
             </p>
@@ -153,7 +192,23 @@
     </div>
 
     <script>
+        const selectEstado = document.getElementById('id_estado');
+        const selectCidade = document.getElementById('id_cidade');
+        const cidadeSelecionada = '<?= $cidadeSelecionada ?>';
 
+        async function carregarCidades(estadoId, selecionada = '') {
+            if (!estadoId) return;
+
+            const cidades = await fetch('index.php?ajax=cidades&estado=' + estadoId).then(r => r.json());
+
+            selectCidade.innerHTML = '<option value="">Selecione uma cidade</option>' +
+                cidades.map(cidade => `<option value="${cidade.id}" ${cidade.id == selecionada ? 'selected' : ''}>${cidade.nome}</option>`).join('');
+        }
+
+        // para o modo editar
+        if (selectEstado.value) {
+            carregarCidades(selectEstado.value, cidadeSelecionada);
+        }
     </script>
 
 </body>
