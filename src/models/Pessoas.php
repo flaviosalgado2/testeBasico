@@ -113,4 +113,12 @@ class Pessoas extends DB
         $stmt->execute();
         return $stmt->fetchAll(\PDO::FETCH_ASSOC);
     }
+
+    public static function excluir(string $id): bool
+    {
+        $conn = DB::getConn();
+        $stmt = $conn->prepare("DELETE FROM pessoas WHERE id = :id");
+        $stmt->bindParam(':id', $id);
+        return $stmt->execute();
+    }
 }

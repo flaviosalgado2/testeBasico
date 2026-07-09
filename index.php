@@ -9,6 +9,12 @@
         $pessoaEditar = Pessoas::buscarPorId($_GET['editar']);
     }
 
+    if (isset($_GET['excluir'])) {
+        Pessoas::excluir($_GET['excluir']);
+        header('Location: index.php');
+        exit;
+    }
+
     if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $pessoa = new Pessoas(
             $_POST['nome'],
@@ -111,7 +117,7 @@
                         <td><?= $pessoa['id_estado'] ?></td>
                         <td>
                             <a href="?editar=<?= $pessoa['id'] ?>">Editar</a>
-                            <a href="">Excluir</a>
+                            <a href="?excluir=<?= $pessoa['id'] ?>" onclick="return confirm('Tem certeza que deseja excluir este contato?');">Excluir</a>
                         </td>
                     </tr>
                 <?php endforeach; ?>

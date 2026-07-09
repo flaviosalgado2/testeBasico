@@ -4,7 +4,7 @@ namespace Flaviosalgado\Testebasico;
 
 class DB
 {
-    private static $instance;
+    private static ?\PDO $instance = null;
 
     public static function getConn()
     {
