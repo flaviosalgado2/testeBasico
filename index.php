@@ -3,6 +3,12 @@
 
     use Flaviosalgado\Testebasico\models\Pessoas;
 
+    $pessoaEditar = null;
+
+    if (isset($_GET['editar'])) {
+        $pessoaEditar = Pessoas::buscarPorId($_GET['editar']);
+    }
+
     if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $pessoa = new Pessoas(
             $_POST['nome'],
@@ -11,7 +17,11 @@
             $_POST['id_estado']
         );
 
-        $pessoa->salvar();
+        if (!empty($_POST['id'])) {
+            $pessoa->atualizar($_POST['id']);
+        } else {
+            $pessoa->salvar();
+        }
 
         header('Location: index.php');
         exit;
@@ -35,24 +45,26 @@
 
     <div>
         <form method="POST" action="">
+            <input type="hidden" name="id" value="<?= $pessoaEditar ? $pessoaEditar['id'] : '' ?>">
+
             <div>
                 <label for="nome">Nome:</label>
-                <input type="text" id="nome" name="nome" required>
+                <input type="text" id="nome" name="nome" value="<?= $pessoaEditar ? $pessoaEditar['nome'] : '' ?>" required>
             </div>
 
             <div>
                 <label for="telefone">Telefone:</label>
-                <input type="text" id="telefone" name="telefone">
+                <input type="text" id="telefone" name="telefone" value="<?= $pessoaEditar ? $pessoaEditar['telefone'] : '' ?>">
             </div>
 
             <div>
                 <label for="id_cidade">ID Cidade:</label>
-                <input type="number" id="id_cidade" name="id_cidade">
+                <input type="number" id="id_cidade" name="id_cidade" value="<?= $pessoaEditar ? $pessoaEditar['id_cidade'] : '' ?>">
             </div>
 
             <div>
                 <label for="id_estado">ID Estado:</label>
-                <input type="number" id="id_estado" name="id_estado">
+                <input type="number" id="id_estado" name="id_estado" value="<?= $pessoaEditar ? $pessoaEditar['id_estado'] : '' ?>">
             </div>
 
             <button type="submit">Salvar</button>
@@ -83,7 +95,7 @@
                         <td><?= $pessoa['id_cidade'] ?></td>
                         <td><?= $pessoa['id_estado'] ?></td>
                         <td>
-                            <a href="">Editar</a>
+                            <a href="?editar=<?= $pessoa['id'] ?>">Editar</a>
                             <a href="">Excluir</a>
                         </td>
                     </tr>

@@ -30,6 +30,27 @@ class Pessoas extends DB
         return $stmt->execute();
     }
 
+    public function atualizar($id)
+    {
+        $conn = DB::getConn();
+        $stmt = $conn->prepare("UPDATE pessoas SET nome = :nome, telefone = :telefone, id_cidade = :id_cidade, id_estado = :id_estado WHERE id = :id");
+        $stmt->bindParam(':id', $id);
+        $stmt->bindParam(':nome', $this->nome);
+        $stmt->bindParam(':telefone', $this->telefone);
+        $stmt->bindParam(':id_cidade', $this->idCidade);
+        $stmt->bindParam(':id_estado', $this->idEstado);
+        return $stmt->execute();
+    }
+
+    public static function buscarPorId($id)
+    {
+        $conn = DB::getConn();
+        $stmt = $conn->prepare("SELECT * FROM pessoas WHERE id = :id");
+        $stmt->bindParam(':id', $id);
+        $stmt->execute();
+        return $stmt->fetch(\PDO::FETCH_ASSOC);
+    }
+
     public static function criarTabelaSeNaoExistir()
     {
         $conn = DB::getConn();
